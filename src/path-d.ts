@@ -1,6 +1,21 @@
 
 import { Vector } from "./vector";
 
+/**
+ * 入力から絶対座標/相対座標を取得。
+ *
+ * @param pl prev location
+ * @param input input location
+ * @param rel is input location relative
+ */
+const getLocation = (pl: number, input: number, rel: boolean):
+    readonly [abs: number, rel: number] => (
+    [
+        rel ? pl + input : input,
+        rel ? input : input - pl,
+    ]
+);
+
 type Pos = (
     | { x?: number, y?: number }
     | { x: number, y: typeof D.any }
