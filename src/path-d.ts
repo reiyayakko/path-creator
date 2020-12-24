@@ -24,10 +24,10 @@ type Pos = (
 
 export class D {
     private readonly _path: Vector<string>[] = [];
-    private _last(): Vector<string> | null {
+    private _last(): Vector<string> {
         const path = this._path;
         const lastIdx = path.length - 1;
-        return path[lastIdx] || null;
+        return path[lastIdx] || Vector.origin;
     }
     private _analyze(
         input: Pos,
