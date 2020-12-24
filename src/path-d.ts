@@ -1,5 +1,5 @@
 
-import { Vector } from "./vector";
+import { Vector, Vector2DWithD } from "./vector";
 
 /**
  * 入力から絶対座標/相対座標を取得。
@@ -29,6 +29,25 @@ export class D {
         const lastIdx = path.length - 1;
         return path[lastIdx] || null;
     }
+    private _analyze(
+        input: Pos,
+        relative: boolean,
+        base=this._last() || Vector.origin
+    ): Vector2DWithD {
+        if(input.x === D.any) {
+            const [y, dy] = getLocation(base.y, input.y, relative);
+            const dx = dy * base.getConnectAngle();
+            return { x: base.x + dx, dx, y, dy };
+        }
+        if(input.y === D.any) {
+            const [x, dx] = getLocation(base.x, input.x, relative);
+            const dy = dx * base.getConnectAngle();
+            return { x, dx, y: base.y + dy, dy };
+        }
+        const [x, dx] = getLocation(base.x, input.x || 0, relative);
+        const [y, dy] = getLocation(base.y, input.y || 0, relative);
+        return { x, dx, y, dy };
+    }
     /**
      * L,V,H
      * lineToコマンドに相当します
@@ -36,6 +55,8 @@ export class D {
      * @param rel 
      */
     line(pos: Pos, rel=false): this {
+        const vector = this._analyze(pos, rel);
+
         return this;
     }
     /**
@@ -44,12 +65,21 @@ export class D {
      * @param rel 
      */
     move(pos: Pos & { close?: boolean }, rel=false): this {
+        const vector = this._analyze(pos, rel);
+
         return this;
     }
-    curve2(p1: Pos | typeof D.any, cmd: Pos, relative=false): this {
+    curve2(p1: Pos | typeof D.any, cmd: Pos, rel=false): this {
+        const vec2d = this._analyze(cmd, rel);
+        const vecP1 = this._analyze(p1, rel);
+        
         return this;
     }
-    curve3(p1: Pos | typeof D.any, p2: Pos, cmd: Pos, relative=false): this {
+    curve3(p1: Pos | typeof D.any, p2: Pos, cmd: Pos, rel=false): this {
+        const vec2d = this._analyze(cmd, rel);
+        const vecP1 = this._analyze(p1, rel);
+        const vecP2 = this._analyze(p2, rel);
+
         return this;
     }
     generate(): string[] {
