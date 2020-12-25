@@ -1,5 +1,5 @@
 
-type toCommand = (this: Vector<string>, prev: Vector<string>) => Command;
+type toCommand = (this: Vector<string, unknown>, prev: Vector<string, unknown>) => Command;
 
 export interface Command {
     cmd: string;
@@ -29,7 +29,7 @@ export class Vector<T extends string, M=null> implements Vector2D {
         this.x = Number(nextVec.x) || 0;
         this.y = Number(nextVec.y) || 0;
     }
-    static origin = new Vector({ x: 0, y: 0 }, "#", () => ({ cmd: "" }), () => NaN, null);
+    static origin = new Vector({ x: 0, y: 0 }, "origin", () => ({ cmd: "" }), () => NaN, null);
     static getAngle(vec1: Vector2D, vec2: Vector2D): number {
         return (vec2.x - vec1.x) / (vec2.y - vec1.y);
     }
