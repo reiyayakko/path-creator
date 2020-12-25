@@ -1,5 +1,6 @@
 
-import { Vector, Vector2DWithD, Command } from "./vector";
+import { Vector, Vector2DWithD, Command as CommandType } from "./vector";
+// import { Command } from "./command";
 
 type StrictVector<T=string> = Extract<
     | Vector<"origin">
@@ -64,7 +65,7 @@ export class D {
         meta?: StrictVector<T>["meta"];
         is: boolean | ((last: Vector<string, unknown>) => boolean);
         getConnectAngle(this: StrictVector<T>): number;
-        toCommand(this: StrictVector<T>, prev: StrictVector): Command;
+        toCommand(this: StrictVector<T>, prev: StrictVector): CommandType;
     }): void {
         const { vector, type } = item;
         if(vector.dx === 0 && vector.dy === 0) return;
@@ -166,7 +167,7 @@ export class D {
             getConnectAngle() {
                 return Vector.getAngle(this.meta.p1, this);
             },
-            toCommand(prev): Command {
+            toCommand(prev): CommandType {
                 if(prev.type === "curve2"
                     && prev.getConnectAngle() === Vector.getAngle(prev, this.meta.p1)
                 ) {
@@ -206,7 +207,7 @@ export class D {
             getConnectAngle() {
                 return Vector.getAngle(this.meta.p2, this);
             },
-            toCommand(prev): Command {
+            toCommand(prev): CommandType {
                 if(prev.type === "curve3"
                     && prev.getConnectAngle() === Vector.getAngle(prev, this.meta.p1)
                 ) return {
