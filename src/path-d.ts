@@ -1,5 +1,5 @@
 
-import { Vector, Vector2DWithD } from "./vector";
+import { Vector, Vector2DWithD, Command } from "./vector";
 
 type StrictVector<T=string> = Extract<
     | Vector<"origin">
@@ -57,6 +57,27 @@ export class D {
         const [x, dx] = getLocation(base.x, input.x || 0, relative);
         const [y, dy] = getLocation(base.y, input.y || 0, relative);
         return { x, dx, y, dy };
+    }
+    private _stack<T extends StrictVector["type"]>(item: {
+        type: T;
+        vector: Vector2DWithD;
+        meta?: StrictVector<T>["meta"];
+        is: boolean | ((last: Vector<string, unknown>) => boolean);
+        getConnectAngle(this: StrictVector<T>): number;
+        toCommand(this: StrictVector<T>, prev: StrictVector): Command;
+    }): void {
+        const { vector, type } = item;
+        if(vector.dx === 0 && vector.dy === 0) return;
+
+        const last = this._last();
+
+        if(last
+            && last.type === type
+            && (typeof item.is === "function" ? item.is(last) : item.is)
+        ) last.setVector(vector); else {
+            const vec = new Vector(vector, type, item.toCommand, item.getConnectAngle, item.meta || null);
+            this._path.push(vec as unknown as StrictVector);
+        }
     }
     /**
      * L,V,H
