@@ -88,6 +88,27 @@ export class D {
     line(pos: Pos, rel=false): this {
         const vector = this._analyze(pos, rel);
 
+        this._stack({
+            type: "line",
+            vector,
+            is(last) {
+                return last.getConnectAngle() === Vector.getAngle(Vector.origin, this.vector);
+            },
+            getConnectAngle() {
+                return Vector.getAngle(Vector.origin, this);
+            },
+            toCommand() {
+                switch(this.getConnectAngle()) {
+                case Infinity:
+                    return { cmd: "H", 0: [this.x] };
+                case 0:
+                    return { cmd: "V", 0: [this.y] };
+                default:
+                    return { cmd: "L", 0: [this.x, this.y] };
+                }
+            }
+        });
+
         return this;
     }
     /**
@@ -97,6 +118,29 @@ export class D {
      */
     move(pos: Pos & { close?: boolean }, rel=false): this {
         const vector = this._analyze(pos, rel);
+
+        if(pos.close) {
+            this._stack({
+                type: "close",
+                vector: Vector.origin,
+                is: true,
+                getConnectAngle: () => 0,
+                toCommand: () => ({ cmd: "Z" }),
+            });
+        }
+
+        this._stack({
+            type: "move",
+            vector,
+            is: true,
+            getConnectAngle() {
+                return Vector.getAngle(Vector.origin, this);
+            },
+            toCommand() {
+                // cmd.meta.z ? "Z" : ""
+                return { cmd: "M", 0: [this.x, this.y] };
+            }
+        });
 
         return this;
     }
@@ -113,7 +157,30 @@ export class D {
             } else p1 = last;
         }
         const vecP1 = this._analyze(p1, rel);
-        
+
+        this._stack({
+            type: "curve2",
+            vector: vec2d,
+            meta: { p1: vecP1 },
+            is: false,
+            getConnectAngle() {
+                return Vector.getAngle(this.meta.p1, this);
+            },
+            toCommand(prev): Command {
+                if(prev.type === "curve2"
+                    && prev.getConnectAngle() === Vector.getAngle(prev, this.meta.p1)
+                ) {
+                    return { cmd: "T", 0: [this.x, this.y] };
+                } else {
+                    return {
+                        cmd: "Q",
+                        0: [this.meta.p1.x, this.meta.p1.y],
+                        1: [this.x, this.y],
+                    };
+                }
+            }
+        });
+
         return this;
     }
     curve3(p1: Pos | typeof D.any, p2: Pos, cmd: Pos, rel=false): this {
@@ -130,6 +197,31 @@ export class D {
         }
         const vecP1 = this._analyze(p1, rel);
         const vecP2 = this._analyze(p2, rel);
+
+        this._stack({
+            type: "curve3",
+            vector: vec2d,
+            meta: { p1: vecP1, p2: vecP2 },
+            is: false,
+            getConnectAngle() {
+                return Vector.getAngle(this.meta.p2, this);
+            },
+            toCommand(prev): Command {
+                if(prev.type === "curve3"
+                    && prev.getConnectAngle() === Vector.getAngle(prev, this.meta.p1)
+                ) return {
+                    cmd: "S",
+                    0: [this.meta.p2.x, this.meta.p2.y],
+                    1: [this.x, this.y]
+                };
+                else return {
+                    cmd: "C",
+                    0: [this.meta.p1.x, this.meta.p1.y],
+                    1: [this.meta.p2.x, this.meta.p2.y],
+                    2: [this.x, this.y],
+                };
+            }
+        });
 
         return this;
     }
