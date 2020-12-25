@@ -227,9 +227,21 @@ export class D {
         return this;
     }
     generate(): string[] {
+        let prev: Vector<string, unknown> = Vector.origin;
         return this._path.map(vector => {
-            //
-            return "";
+            const command = vector.toCommand(prev);
+            const commandStrings: string[] = [];
+
+            for(let i = 0;i in command;i++) {
+                const cmdString = command[i]
+                    .map(pos => +pos!.toFixed(10))
+                    .join(" ");
+
+                commandStrings.push(cmdString);
+            }
+
+            prev = vector;
+            return command.cmd + commandStrings.join(",");
         });
     }
     toString(): string {
