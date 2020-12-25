@@ -102,12 +102,32 @@ export class D {
     }
     curve2(p1: Pos | typeof D.any, cmd: Pos, rel=false): this {
         const vec2d = this._analyze(cmd, rel);
+        if(p1 === D.any) {
+            const last = this._last();
+            if(last.type === "curve2") {
+                const $p1 = last.meta.p1;
+                p1 = {
+                    x: last.x + $p1.dx,
+                    y: last.y + $p1.dy,
+                };
+            } else p1 = last;
+        }
         const vecP1 = this._analyze(p1, rel);
         
         return this;
     }
     curve3(p1: Pos | typeof D.any, p2: Pos, cmd: Pos, rel=false): this {
         const vec2d = this._analyze(cmd, rel);
+        if(p1 === D.any) {
+            const last = this._last();
+            if(last.type === "curve3") {
+                const $p2 = last.meta.p2;
+                p1 = {
+                    x: last.x + $p2.dx,
+                    y: last.y + $p2.dy,
+                };
+            } else p1 = last;
+        }
         const vecP1 = this._analyze(p1, rel);
         const vecP2 = this._analyze(p2, rel);
 
