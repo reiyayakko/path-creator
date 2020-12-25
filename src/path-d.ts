@@ -1,6 +1,16 @@
 
 import { Vector, Vector2DWithD } from "./vector";
 
+type StrictVector<T=string> = Extract<
+    | Vector<"origin">
+    | Vector<"line">
+    | Vector<"move">
+    | Vector<"close">
+    | Vector<"curve2", { p1: Vector2DWithD }>
+    | Vector<"curve3", { p1: Vector2DWithD, p2: Vector2DWithD }>
+    , { type: T }
+>;
+
 /**
  * 入力から絶対座標/相対座標を取得。
  *
@@ -23,8 +33,8 @@ type Pos = (
 );
 
 export class D {
-    private readonly _path: Vector<string>[] = [];
-    private _last(): Vector<string> {
+    private readonly _path: StrictVector[] = [];
+    private _last(): StrictVector {
         const path = this._path;
         const lastIdx = path.length - 1;
         return path[lastIdx] || Vector.origin;
